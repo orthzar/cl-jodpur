@@ -1,4 +1,4 @@
-# cl-jodpur, and implementation of JODPUR in Common Lisp
+# cl-jodpur, an implementation of JODPUR in Common Lisp
 
 >"Supporting every statement is an asterisk. Supporting each asterisk is two more asterisks. It's asterisks all the way down." -- some guy, who thinks he's clever, but who is actually an idiot
 
@@ -53,6 +53,8 @@ JODPUR...
 ## Serious Introduction (to a joke programming language)
 
 **WARNING: This entire repo is not remotely usable yet. This README is a goal, not a reflection of the current status of the repo (see [this](https://tom.preston-werner.com/2010/08/23/readme-driven-development.html) for an explanation).**
+
+JODPUR stands for ```Joe's Own Descriptive Programming langUage Rodeo```.
 
 This is an initial implementation of JODPUR, a joke programming language whose syntax is TOML. The joke here is that JODPUR uses TOML for syntax; everything else is not intended to be a joke (well, to me, anyways. You are free, for the time being, to view JODPUR as a top-to-bottom joke.).
 
