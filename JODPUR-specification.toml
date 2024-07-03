@@ -1,0 +1,107 @@
+# JODPUR: A Programming Language whose syntax is TOML.
+# JODPUR stands for Joe's Own Declarative Progamming langUage Rodeo
+# (An alternative name was JOML, which would stand for Joe's Own Meta Language, but this has nothing to do with Standard ML or Ocaml. Plus JODPUR is a funnier name, and you should always pick the funnier option, ceteris paribus.)
+
+# The goal of this TOML file is to describe JODPUR in terms of TOML and a host language (Common Lisp).
+# To implement JODPUR, you will only need a TOML library for a host language, and then re-write the JODPUR objects to use your chosen host language.
+# Ideally, you should only need to rewrite the host language code to implement JODPUR in another host language, but it's possible your chosen host language is too limited and more JODPUR objects may need to be re-written in your chosen host language.
+# Whether JODPUR can be specified in terms of JODPUR is left as a challenge for the reader. It probably is, but I'm too lazy right now to do that.
+
+# JODPUR is a declarative programming language.
+# A JODPUR program consists of a bunch of objects, which you define using TOML.
+# Each JODPUR object can be a function, a variable, a new type of object, etc.
+# When you load a JODPUR file, the implementation creates all teh object defined therein, and either runs the main function or drops you into a command prompt.
+# At the command prompt, you can run commands (e.g. exit) or you can add more code (e.g. new function definitions).
+
+# Aside: TOML is nominally an infix-notation syntax (e.g. foo = bar), whereas JODPUR uses prefix notation (e.g. command argument1 argument2) where TOML doesn't impose any particular kind of syntax. Prefix notation is used in the bodies of functions and at the command prompt, because those are essentially the same thing in JODPUR.
+
+# In this language, everything is an object, consisting of a name and some attributes.
+[foo] # First, we declare the name of the object by typing a symbol name, wrapped in square brackets.
+type = "variable" # Then we declare the attributes of the object. In this case, we define a variable.
+value = "bar" # Lastly, we define what the value of this variable object is.
+
+[baz]
+type = "function" # Functions are objects too.
+# Arguments are a list of local variable names and their types.
+arguments = { corgie = "number", # We can specify the type of each argument by making a list consisting of the name of the argument and a type.
+              grault = "number", 
+              garply = "number" }
+body = [
+         [ "add", "corgie", "grault", "garply" ], # We pass 1 and 2 to add
+         [ "substract", 1, "stdin" ] # We pass 1 and the result of the above addition (as standard input) to substract
+       ]
+side-effects = [ "stdout", "termout" ] # We define what we want the side-effects to be. In this case, we want the result of computation to be emitted via standard out and to be printed to the terminal.
+documentation = "This function accepts three numbers" # We can add a documentation string to any object so we can tell other humans the what and why of the object.
+
+# Since everything is an object, we need to be able to define classes.
+# We've already seen variables and functions; those are two kinds of standard objects.
+# The type declaration is actually a class declaration, but I won't tell anyone about term rewriting if you won't.
+[some-dumb-new-class-that-nobody-will-ever-love]
+type = "class"
+body = [ ]
+
+# Since JODPUR's syntax is a data format, we can read and write the contents of any object.
+[change-documentation-string]
+arguments = [ "object-name", "new-documentation-string" ]
+
+# To add some security, we can restrict what objects a given piece of code can access.
+[only-math]
+type = "security-rails" # Ya know, like FreeBSD jails.
+capabilities_functions_allowed = [ "add", "substract", "divide", "multiply", "reject-divide-by-zero" ] # Only these functions are allowed to be used by code run in this rail.
+capabilities_object_types_allowed = [ "function", "numbers-small", "integers" ] # Only these types of objects can be referenced by code run in this rail.
+capabilities_conditional = [ # When the code runs certain code, it must fulfill one or more conditions.
+                             [ [ "divide", "reject-divide-by-zero" ] ], # This means that divide can only be used in conjunction with reject-divide-by-zero
+                           ]
+
+# Since the syntax is a data format, we can change anything at runtime via a prompt:
+[]
+type = a
+
+# At the prompt, you can define (or re-define) objects; you can run commands (e.g. exit); and you can run bare code, such as:
+[ add, 1 2, ]
+# When you submit a list like the above, JOML knows to treat the first item as a function and the rest as arguments, just like in the body of a function definition.
+# The JOML prompt will print anything that the functions says to print.
+# But in thiis case, the add function combines.
+
+# To make this language easy to bootstrap, most of it is written in itself.
+# Implementors can more JOML objects in another language, but a bare minimum of these are needed:
+[ ]
+# Notice that prompts
+
+[lisp-add]
+type = "host-language-function-call" # For implementation purposes, you can call functions of the host language, pass it arguments, and get the result(s).
+arguments = [ "a", "b" ]
+body = [ # The body of the host-language-function-call
+         [
+          # The body of this type of function must return a string, which will be passed to the host language. In this case, that is Lisp or Scheme (since the syntax here is identical between them).
+          "concatenate" [ "(+ ", "a", " ", "b", ")" ]
+          # I should say, that we could use a symbolic expressions library here to make writing Lisp code easier, but we haven't defined libraries yet.
+         ]
+       ]
+
+# It is possible to run machine code from inside JODPUR, which is critical for native code compilation.
+# A JODPUR implementation is not required to do native code compilation.
+[machine-code-add]
+type = "host-language-function-call"
+# I have no idea how to implement this, yet. So this comment will have to suffice (it doesn't (I'm too tired to explain why)).
+
+# Libraries are objects that consists a list of object names.
+# You can run the command get-new-objects and it will return a list of all objects that are not apart of any library (and also not provided by the implementation)
+[some-lame-library]
+type = "library"
+body = [ "lisp-add", "machine-code-add", "only-math" ]
+# This will mutate the objects to add a member-of attribute.
+# Of course, you can add the member-of attribute manually, which is a good idea if a file has definitions of more than one library in it.
+# The primary purpose of this is to allow two libraries to
+
+# commands are defined simimlarly to functions.
+# When you define one, JODPUR will add it to the list of commands.
+[exit]
+type = "command"
+body = [
+        # This definition assumes you implemented JODPUR in a Unix shell (which you shouldn't, but if you do, I will file an informal complaint).
+        [ "host-language-call", "kill", "jodpur::process-id" ]
+       ]
+
+
+[prompt]
